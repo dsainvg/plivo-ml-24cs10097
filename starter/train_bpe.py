@@ -1,63 +1,96 @@
 import json
 import os
+import re
 import time
+from collections import Counter
 
-def get_stats(ids):
+def get_stats(word_freqs):
     counts = {}
-    for pair in zip(ids, ids[1:]):
-        counts[pair] = counts.get(pair, 0) + 1
+    for word_ids, freq in word_freqs.items():
+        for pair in zip(word_ids, word_ids[1:]):
+            counts[pair] = counts.get(pair, 0) + freq
     return counts
 
-def merge(ids, pair, idx):
-    new_ids = []
-    i = 0
+def merge_vocab(word_freqs, pair, new_id):
+    new_word_freqs = {}
     p0, p1 = pair
-    n = len(ids)
-    while i < n:
-        if i < n - 1 and ids[i] == p0 and ids[i+1] == p1:
-            new_ids.append(idx)
-            i += 2
-        else:
-            new_ids.append(ids[i])
-            i += 1
-    return new_ids
+    for word_ids, freq in word_freqs.items():
+        if len(word_ids) <= 1:
+            new_word_freqs[word_ids] = freq
+            continue
+        new_ids = []
+        i = 0
+        n = len(word_ids)
+        while i < n:
+            if i < n - 1 and word_ids[i] == p0 and word_ids[i+1] == p1:
+                new_ids.append(new_id)
+                i += 2
+            else:
+                new_ids.append(word_ids[i])
+                i += 1
+        new_word_freqs[tuple(new_ids)] = freq
+    return new_word_freqs
 
-def train_bpe(text, vocab_size, max_train_bytes=500000):
-    print(f"Training BPE with vocab_size={vocab_size} on first {max_train_bytes} bytes...")
+def train_bpe(text, vocab_size):
+    print(f"Training BPE with vocab_size={vocab_size} on ENTIRE corpus...")
     t0 = time.time()
-    tokens = list(text[:max_train_bytes].encode("utf-8"))
+    
+    # Split text into words and count frequencies
+    pattern = re.compile(r'\s+|\S+')
+    words = pattern.findall(text)
+    word_counts = Counter(w.encode("utf-8") for w in words)
+    print(f"  Unique words: {len(word_counts):,}")
+    
+    # Convert to dict of tuple of ints -> freq
+    word_freqs = {tuple(w): count for w, count in word_counts.items()}
     
     num_merges = vocab_size - 256
-    merges = {} # (p0, p1) -> new_id
+    merges = {}
     
     for i in range(num_merges):
-        stats = get_stats(tokens)
+        stats = get_stats(word_freqs)
         if not stats:
             break
         best_pair = max(stats, key=stats.get)
         new_id = 256 + i
-        tokens = merge(tokens, best_pair, new_id)
+        word_freqs = merge_vocab(word_freqs, best_pair, new_id)
         merges[best_pair] = new_id
         if (i + 1) % 100 == 0 or (i + 1) == num_merges:
-            print(f"  Merge {i+1}/{num_merges}: {best_pair} -> {new_id} (remaining tokens: {len(tokens)})")
+            print(f"  Merge {i+1}/{num_merges}: {best_pair} -> {new_id}")
             
     t1 = time.time()
     print(f"BPE training took {t1 - t0:.2f}s")
     return merges
 
 def encode(text, merges):
-    tokens = list(text.encode("utf-8"))
-    for pair, new_id in merges.items():
-        tokens = merge(tokens, pair, new_id)
-    return tokens
+    pattern = re.compile(r'\s+|\S+')
+    words = pattern.findall(text)
+    cache = {}
+    res = []
+    for w in words:
+        w_bytes = w.encode("utf-8")
+        if w_bytes not in cache:
+            ids = list(w_bytes)
+            for pair, new_id in merges.items():
+                p0, p1 = pair
+                if p0 not in ids or p1 not in ids:
+                    continue
+                i = 0
+                while i < len(ids) - 1:
+                    if ids[i] == p0 and ids[i+1] == p1:
+                        ids[i] = new_id
+                        del ids[i+1]
+                    else:
+                        i += 1
+            cache[w_bytes] = ids
+        res.extend(cache[w_bytes])
+    return res
 
 def decode(ids, merges):
-    # Inverse merges mapping
     vocab = {i: bytes([i]) for i in range(256)}
     for pair, idx in merges.items():
         vocab[idx] = vocab[pair[0]] + vocab[pair[1]]
-        
-    res_bytes = b"".join(vocab[idx] for idx in ids)
+    res_bytes = b"".join(vocab[idx] for idx in ids if idx in vocab)
     return res_bytes.decode("utf-8", errors="replace")
 
 if __name__ == "__main__":
@@ -65,9 +98,9 @@ if __name__ == "__main__":
     with open(data_path, "r", encoding="utf-8") as f:
         text = f.read()
     
-    # Train BPE with vocab size 1024 on 500k bytes of text
+    # Train BPE with vocab size 1024 on the entire corpus
     vocab_size = 1024
-    merges = train_bpe(text, vocab_size, max_train_bytes=500000)
+    merges = train_bpe(text, vocab_size)
     
     # Save merges to JSON
     # Convert tuple keys to strings for JSON
