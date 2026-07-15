@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Speedrun Optimization Summary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --cyan: #06b6d4;
+            --blue: #3b82f6;
+            --purple: #a855f7;
+            --gradient-accent: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #a855f7 100%);
+            --gradient-success: linear-gradient(135deg, #10b981, #059669);
+            --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.6;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            position: relative;
+        }
+
+        .badge {
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: var(--cyan);
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(4px);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value.highlight {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #10b981;
+        }
+
+        /* Details Section */
+        .grid-details {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 868px) {
+            .grid-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2.25rem;
+            backdrop-filter: blur(12px);
+            height: 100%;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 0.75rem;
+        }
+
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 1.5rem;
+            background: var(--gradient-accent);
+            border-radius: 2px;
+        }
+
+        .features-list {
+            list-style: none;
+        }
+
+        .feature-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 1.05rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-title span {
+            color: var(--cyan);
+            font-size: 0.8rem;
+            background: rgba(6, 182, 212, 0.1);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            padding-left: 0.5rem;
+        }
+
+        /* Attribution / Breakdown */
+        .breakdown-card {
+            background: linear-gradient(180deg, rgba(168, 85, 247, 0.04) 0%, rgba(59, 130, 246, 0.02) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.15);
+        }
+
+        .progress-container {
+            margin-top: 1.5rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-bg {
+            background: rgba(255, 255, 255, 0.05);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-bar-fill {
+            background: var(--gradient-accent);
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s ease-in-out;
+        }
+
+        .attribution-details {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .attribution-details ul {
+            list-style: none;
+            margin-top: 0.75rem;
+        }
+
+        .attribution-details li {
+            position: relative;
+            padding-left: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .attribution-details li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: var(--purple);
+        }
+
+        /* Loss Curve Section */
+        .loss-container {
+            margin-top: 2rem;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .loss-curve-placeholder {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.05), rgba(168, 85, 247, 0.05));
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        footer strong {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="badge">Optimization Summary</div>
+            <h1>2,000 Step LLM Speedrun</h1>
+            <p>A comprehensive summary of the architecture upgrades, optimization runs, and final results for the Plivo LLM speedrun challenge.</p>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Baseline BPB</div>
+                <div class="stat-value">2.3718</div>
+                <div class="stat-change" style="color: var(--text-secondary)">Raw Byte Tokenizer</div>
+            </div>
+            <div class="stat-card" style="border-color: rgba(6, 182, 212, 0.35);">
+                <div class="stat-label">Optimized BPB</div>
+                <div class="stat-value highlight">1.8856</div>
+                <div class="stat-change">▼ 20.5% Improvement</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Parameters</div>
+                <div class="stat-value">1,392,800</div>
+                <div class="stat-change" style="color: #34d399">Limit: 2,000,000</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Training Time</div>
+                <div class="stat-value">320s</div>
+                <div class="stat-change" style="color: #34d399">Limit: ~5 mins (CPU)</div>
+            </div>
+        </section>
+
+        <section class="grid-details">
+            <div class="card">
+                <h2>Model Architecture Upgrades</h2>
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <div class="feature-title">Byte-Pair Encoding (BPE) Tokenizer <span>Vocab: 1024</span></div>
+                        <div class="feature-desc">Replaced the raw byte-level tokenizer with an optimized BPE tokenizer trained on the corpus. Achieve 1.95x sequence compression, which effectively doubles the model's context window (block size 128 tokens represents ~237 bytes of text). Implemented cache lookup and quick membership checks to process the 7.3 MB training set in 15 seconds.</div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-title">Rotary Positional Embeddings (RoPE) <span>Parameter-free</span></div>
+                        <div class="feature-desc">Replaced absolute learned positional embeddings with Rotary Position Embeddings. Improved relative position modeling and saved parameters to reallocate to model capacity.</div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-title">Weight Tying <span>Saved 164k params</span></div>
+                        <div class="feature-desc">Tied weights of the token embedding matrix and the language model output head, reducing parameters from 1.55M to 1.39M, enabling a larger vocabulary size.</div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-title">SwiGLU Feed-Forward Blocks <span>d_ff: 426</span></div>
+                        <div class="feature-desc">Substituted GELU activations with LLaMA-style SwiGLU feed-forward networks (without biases), offering smoother gradients and quicker learning rates.</div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-title">RMSNorm Normalization <span>Simplified Norm</span></div>
+                        <div class="feature-desc">Replaced LayerNorm with parameter-free RMSNorm (with learned scaling weights only), speeding up CPU computation per step.</div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-title">AdamW & Cosine LR Schedule <span>Warmup: 200 steps</span></div>
+                        <div class="feature-desc">Implemented a cosine decay schedule (peak 1e-3, min 1e-4) with a linear warmup phase. Utilized AdamW optimizer with a weight decay of 0.1 (excluding biases and norms) and gradient clipping at 1.0.</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card breakdown-card">
+                <h2>Contribution Breakdown</h2>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Antigravity Agent (Machine)</span>
+                        <strong>90%</strong>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 90%;"></div>
+                    </div>
+
+                    <div class="progress-label">
+                        <span>Human User</span>
+                        <strong>10%</strong>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 10%; background: var(--purple);"></div>
+                    </div>
+                </div>
+
+                <div class="attribution-details">
+                    <strong>Machine Done (Antigravity):</strong>
+                    <ul>
+                        <li>Created optimized CachedBPE tokenizer logic.</li>
+                        <li>Implemented RMSNorm, RoPE, and SwiGLU layers.</li>
+                        <li>Configured AdamW, weight decay grouping, and cosine schedule.</li>
+                        <li>Executed training runs, monitored metrics, and analyzed results.</li>
+                    </ul>
+                    <br>
+                    <strong>Human Done (User):</strong>
+                    <ul>
+                        <li>Clarified constraints (3-5 min run limits).</li>
+                        <li>Managed codebase directory locations (moving deliverables to parent dir).</li>
+                        <li>Approved optimization strategies.</li>
+                    </ul>
+                </div>
+
+                <div class="loss-container">
+                    <div class="stat-label" style="margin-bottom: 0.75rem;">Training Loss Evolution</div>
+                    <div class="loss-curve-placeholder">
+                        Loss: 6.9559 (step 1) -> 2.2903 (step 2000)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>LLM Speedrun Completed Successfully. Final checkpoint: <strong>ckpt.pt</strong> | Final dev bpb: <strong>1.8856</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

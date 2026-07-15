@@ -18,22 +18,72 @@ You may replace this with anything you train ON THE PROVIDED CORPUS ONLY
      saved files relative to __file__ to be safe.
 """
 import json
+import os
+import re
 
 
-class ByteTokenizer:
-    vocab_size = 256
+class CachedBPETokenizer:
+    def __init__(self, merges):
+        self.merges = merges
+        self.vocab_size = 256 + len(merges)
+        self.cache = {}
+        self.pattern = re.compile(r'\s+|\S+')
 
     def encode(self, text):
-        return list(text.encode("utf-8"))
+        if not text:
+            return []
+        words = self.pattern.findall(text)
+        res = []
+        for w in words:
+            w_bytes = w.encode("utf-8")
+            if w_bytes not in self.cache:
+                ids = list(w_bytes)
+                for pair, new_id in self.merges.items():
+                    p0, p1 = pair
+                    if p0 not in ids or p1 not in ids:
+                        continue
+                    i = 0
+                    while i < len(ids) - 1:
+                        if ids[i] == p0 and ids[i+1] == p1:
+                            ids[i] = new_id
+                            del ids[i+1]
+                        else:
+                            i += 1
+                self.cache[w_bytes] = ids
+            res.extend(self.cache[w_bytes])
+        return res
 
     def decode(self, ids):
-        return bytes(ids).decode("utf-8", errors="replace")
-
-    def save(self, path):
-        with open(path, "w") as f:
-            json.dump({"type": "byte"}, f)
+        if not ids:
+            return ""
+        vocab = {i: bytes([i]) for i in range(256)}
+        for pair, idx in self.merges.items():
+            vocab[idx] = vocab[pair[0]] + vocab[pair[1]]
+        res_bytes = b"".join(vocab[idx] for idx in ids if idx in vocab)
+        return res_bytes.decode("utf-8", errors="replace")
 
 
 def load(path=None):
     """Return the tokenizer used by evaluate.py. Replace as needed."""
-    return ByteTokenizer()
+    if path is None:
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(dir_path, "bpe_merges.json")
+    
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            serializable_merges = json.load(f)
+        merges = {}
+        for k, v in serializable_merges.items():
+            p0, p1 = map(int, k.split(","))
+            merges[(p0, p1)] = v
+        return CachedBPETokenizer(merges)
+    else:
+        # Fallback to byte-level tokenizer if merges json doesn't exist
+        class ByteTokenizer:
+            vocab_size = 256
+            def encode(self, text):
+                return list(text.encode("utf-8"))
+            def decode(self, ids):
+                return bytes(ids).decode("utf-8", errors="replace")
+        return ByteTokenizer()
+

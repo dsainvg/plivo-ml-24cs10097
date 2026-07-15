@@ -11,6 +11,7 @@ HARD CAPS (checked at grading, violations = disqualified run):
     python train.py --data ../data/train_corpus.txt --steps 2000 --out ckpt.pt
 """
 import argparse
+import math
 import time
 
 import torch
@@ -34,7 +35,7 @@ def main():
     ap.add_argument("--data", required=True)
     ap.add_argument("--steps", type=int, default=2000)
     ap.add_argument("--batch", type=int, default=8)
-    ap.add_argument("--lr", type=float, default=3e-4)
+    ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--seed", type=int, default=1337)
     ap.add_argument("--out", default="ckpt.pt")
     ap.add_argument("--log_every", type=int, default=100)
@@ -56,27 +57,56 @@ def main():
     print(f"model: {n:,} params")
     assert n <= MAX_PARAMS, f"cap: max {MAX_PARAMS:,} params"
 
-    # baseline choices, all questionable on purpose:
-    opt = torch.optim.Adam(model.parameters(), lr=args.lr)  # constant LR,
-    # no warmup, no schedule, no weight decay, no gradient clipping.
+    # Separate weights for weight decay
+    decay_params = []
+    nodecay_params = []
+    for name, param in model.named_parameters():
+        if not param.requires_grad:
+            continue
+        if param.dim() >= 2:
+            decay_params.append(param)
+        else:
+            nodecay_params.append(param)
+
+    optim_groups = [
+        {"params": decay_params, "weight_decay": 0.1},
+        {"params": nodecay_params, "weight_decay": 0.0}
+    ]
+    opt = torch.optim.AdamW(optim_groups, lr=args.lr, betas=(0.9, 0.95), eps=1e-8)
+
+    warmup_steps = int(0.1 * args.steps)  # 10% of steps for warmup
+    min_lr = 0.1 * args.lr
 
     model.train()
     t0 = time.time()
     losses = []
     for step in range(1, args.steps + 1):
+        # Cosine LR schedule with warmup
+        if step <= warmup_steps:
+            lr = args.lr * (step / warmup_steps)
+        else:
+            progress = (step - warmup_steps) / (args.steps - warmup_steps)
+            lr = min_lr + 0.5 * (args.lr - min_lr) * (1.0 + math.cos(progress * math.pi))
+        
+        for param_group in opt.param_groups:
+            param_group['lr'] = lr
+
         x, y = get_batch(ids, cfg.block_size, args.batch, device)
         _, loss = model(x, y)
         opt.zero_grad(set_to_none=True)
         loss.backward()
+        
+        # Gradient norm clipping
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        
         opt.step()
         losses.append(loss.item())
         if step % args.log_every == 0 or step == 1:
             avg = sum(losses[-args.log_every:]) / len(losses[-args.log_every:])
-            print(f"step {step:5d}  loss {avg:.4f}  "
+            print(f"step {step:5d}  loss {avg:.4f}  lr {lr:.6f}  "
                   f"({(time.time()-t0)/step*1000:.0f} ms/step)")
 
-    # every public config attribute is saved — if you add fields to Config,
-    # they ride along automatically and evaluate.py rebuilds the same model
+    # Save model checkpoint along with public Config attributes
     torch.save({"model": model.state_dict(),
                 "config": {k: getattr(cfg, k) for k in dir(cfg)
                            if not k.startswith("_")
