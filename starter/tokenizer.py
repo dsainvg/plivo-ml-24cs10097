@@ -23,16 +23,23 @@ import re
 
 
 class CachedBPETokenizer:
+    # Optimized pre-tokenization regex:
+    # 1. Alphanumeric words (English & Hindi) with optional leading space
+    # 2. Spaces
+    # 3. Individual punctuation/fallback characters
+    PATTERN = re.compile(
+        r' ?[\u0900-\u097Fa-zA-Z0-9]+|\s+|[^\s]'
+    )
+
     def __init__(self, merges):
         self.merges = merges
         self.vocab_size = 256 + len(merges)
         self.cache = {}
-        self.pattern = re.compile(r'\s+|\S+')
 
     def encode(self, text):
         if not text:
             return []
-        words = self.pattern.findall(text)
+        words = self.PATTERN.findall(text)
         res = []
         for w in words:
             w_bytes = w.encode("utf-8")

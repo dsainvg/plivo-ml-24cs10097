@@ -4,6 +4,12 @@ import re
 import time
 from collections import Counter
 
+# Optimized pre-tokenization: alphanumeric words (English & Hindi) with optional leading space | spaces | single chars
+# Must be IDENTICAL to the pattern in tokenizer.py so merges are consistent
+BILINGUAL_PATTERN = re.compile(
+    r' ?[\u0900-\u097Fa-zA-Z0-9]+|\s+|[^\s]'
+)
+
 def get_stats(word_freqs):
     counts = {}
     for word_ids, freq in word_freqs.items():
@@ -35,9 +41,8 @@ def train_bpe(text, vocab_size):
     print(f"Training BPE with vocab_size={vocab_size} on ENTIRE corpus...")
     t0 = time.time()
     
-    # Split text into words and count frequencies
-    pattern = re.compile(r'\s+|\S+')
-    words = pattern.findall(text)
+    # Split text into words using bilingual-aware regex, count frequencies
+    words = BILINGUAL_PATTERN.findall(text)
     word_counts = Counter(w.encode("utf-8") for w in words)
     print(f"  Unique words: {len(word_counts):,}")
     
@@ -63,8 +68,7 @@ def train_bpe(text, vocab_size):
     return merges
 
 def encode(text, merges):
-    pattern = re.compile(r'\s+|\S+')
-    words = pattern.findall(text)
+    words = BILINGUAL_PATTERN.findall(text)
     cache = {}
     res = []
     for w in words:
@@ -98,8 +102,8 @@ if __name__ == "__main__":
     with open(data_path, "r", encoding="utf-8") as f:
         text = f.read()
     
-    # Train BPE with vocab size 1024 on the entire corpus
-    vocab_size = 1024
+    # Train BPE with vocab size 2048 on the ENTIRE corpus
+    vocab_size = 2048
     merges = train_bpe(text, vocab_size)
     
     # Save merges to JSON

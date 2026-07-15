@@ -321,17 +321,17 @@
             </div>
             <div class="stat-card" style="border-color: rgba(6, 182, 212, 0.35);">
                 <div class="stat-label">Optimized BPB</div>
-                <div class="stat-value highlight">1.9153</div>
-                <div class="stat-change">▼ 19.2% Improvement</div>
+                <div class="stat-value highlight">1.8285</div>
+                <div class="stat-change">▼ 22.9% Improvement</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Total Parameters</div>
-                <div class="stat-value">1,392,800</div>
-                <div class="stat-change" style="color: #34d399">Limit: 2,000,000</div>
+                <div class="stat-value" style="font-size: 1.8rem; padding-top: 0.4rem; padding-bottom: 0.2rem;">1,824,624 / 1,499,200</div>
+                <div class="stat-change" style="color: #34d399">Total / Active Caps Met</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Training Time</div>
-                <div class="stat-value">239s</div>
+                <div class="stat-value">286s</div>
                 <div class="stat-change" style="color: #34d399">Limit: ~5 mins (CPU)</div>
             </div>
         </section>
@@ -341,28 +341,28 @@
                 <h2>Model Architecture Upgrades</h2>
                 <ul class="features-list">
                     <li class="feature-item">
-                        <div class="feature-title">Byte-Pair Encoding (BPE) Tokenizer <span>Vocab: 1024</span></div>
-                        <div class="feature-desc">Replaced the raw byte-level tokenizer with an optimized BPE tokenizer trained on the entire corpus. Achieve 2.21x sequence compression, which effectively doubles the model's context window (block size 128 tokens represents ~283 bytes of text). Implemented cache lookup and quick membership checks to process the 7.3 MB training set in 15 seconds.</div>
+                        <div class="feature-title">Space-Preserving BPE Tokenizer <span>Vocab: 2048</span></div>
+                        <div class="feature-desc">Implemented an optimized space-preserving BPE regex pattern (` ?[\u0900-\u097Fa-zA-Z0-9]+|\s+|[^\s]`) which groups words with their leading spaces. This achieved an outstanding **3.35x compression ratio**, allowing a context window of 128 tokens to span **429 bytes** of text on average.</div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-title">5-Layer Hybrid MoE Architecture <span>3 Dense, 2 MoE</span></div>
+                        <div class="feature-desc">Configured a 5-layer transformer where layers 2 and 3 are MoE blocks with 2 experts each, while layers 0, 1, and 4 remain dense to stabilize embeddings and output projection. This layout maximizes model parameters to **1.82M total** and **1.49M active** per token, fitting tightly under our limits.</div>
                     </li>
                     <li class="feature-item">
                         <div class="feature-title">Rotary Positional Embeddings (RoPE) <span>Parameter-free</span></div>
-                        <div class="feature-desc">Replaced absolute learned positional embeddings with Rotary Position Embeddings. Improved relative position modeling and saved parameters to reallocate to model capacity.</div>
+                        <div class="feature-desc">Replaced absolute learned positional embeddings with Rotary Position Embeddings on queries and keys, improving relative sequence modeling.</div>
                     </li>
                     <li class="feature-item">
-                        <div class="feature-title">Weight Tying <span>Saved 164k params</span></div>
-                        <div class="feature-desc">Tied weights of the token embedding matrix and the language model output head, reducing parameters from 1.55M to 1.39M, enabling a larger vocabulary size.</div>
+                        <div class="feature-title">Weight Tying <span>Saved 327k params</span></div>
+                        <div class="feature-desc">Tied weights of the token embedding matrix and output linear head, saving 327k parameters to allow for the larger 2048 vocabulary.</div>
                     </li>
                     <li class="feature-item">
-                        <div class="feature-title">SwiGLU Feed-Forward Blocks <span>d_ff: 426</span></div>
-                        <div class="feature-desc">Substituted GELU activations with LLaMA-style SwiGLU feed-forward networks (without biases), offering smoother gradients and quicker learning rates.</div>
+                        <div class="feature-title">SwiGLU Feed-Forward Blocks <span>d_ff: 368</span></div>
+                        <div class="feature-desc">Substituted GELU activations with LLaMA-style SwiGLU feed-forward networks (without biases), offering smoother gradients and faster learning.</div>
                     </li>
                     <li class="feature-item">
                         <div class="feature-title">RMSNorm Normalization <span>Simplified Norm</span></div>
                         <div class="feature-desc">Replaced LayerNorm with parameter-free RMSNorm (with learned scaling weights only), speeding up CPU computation per step.</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-title">AdamW & Cosine LR Schedule <span>Warmup: 200 steps</span></div>
-                        <div class="feature-desc">Implemented a cosine decay schedule (peak 1e-3, min 1e-4) with a linear warmup phase. Utilized AdamW optimizer with a weight decay of 0.1 (excluding biases and norms) and gradient clipping at 1.0.</div>
                     </li>
                 </ul>
             </div>
@@ -391,30 +391,30 @@
                     <strong>Machine Done (Antigravity):</strong>
                     <ul>
                         <li>Created optimized CachedBPE tokenizer logic.</li>
-                        <li>Implemented RMSNorm, RoPE, and SwiGLU layers.</li>
+                        <li>Implemented RMSNorm, RoPE, SwiGLU, and hybrid MoE layers.</li>
                         <li>Configured AdamW, weight decay grouping, and cosine schedule.</li>
                         <li>Executed training runs, monitored metrics, and analyzed results.</li>
                     </ul>
                     <br>
                     <strong>Human Done (User):</strong>
                     <ul>
-                        <li>Clarified constraints (3-5 min run limits).</li>
-                        <li>Managed codebase directory locations (moving deliverables to parent dir).</li>
-                        <li>Approved optimization strategies.</li>
+                        <li>Clarified constraints (3-5 min run limits, 1.5M active parameter cap).</li>
+                        <li>Guided MoE block layer distribution (keeping last layer dense).</li>
+                        <li>Managed codebase directory locations.</li>
                     </ul>
                 </div>
 
                 <div class="loss-container">
                     <div class="stat-label" style="margin-bottom: 0.75rem;">Training Loss Evolution</div>
                     <div class="loss-curve-placeholder">
-                        Loss: 6.8899 (step 1) -> 2.7749 (step 2000)
+                        Loss: 7.6677 (step 1) -> 3.8829 (step 2000)
                     </div>
                 </div>
             </div>
         </section>
 
         <footer>
-            <p>LLM Speedrun Completed Successfully. Final checkpoint: <strong>ckpt.pt</strong> | Final dev bpb: <strong>1.9153</strong></p>
+            <p>LLM Speedrun Completed Successfully. Final checkpoint: <strong>ckpt.pt</strong> | Final dev bpb: <strong>1.8285</strong></p>
         </footer>
     </div>
 </body>

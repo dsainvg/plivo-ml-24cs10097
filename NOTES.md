@@ -1,12 +1,12 @@
 # Notes
 
-1. Our best configuration uses a vocabulary size of 1024 BPE tokens, a context block size of 128, a 4-layer model with 4 attention heads, an embedding dimension of 160, and a SwiGLU feed-forward hidden dimension of 426.
-2. Weight tying between token embeddings and the output language modeling head reduces the model parameter count by 163,840, permitting a larger vocabulary size without exceeding the parameter cap.
-3. The Byte-Pair Encoding (BPE) tokenizer provides a 2.21x compression ratio on the training corpus, which effectively increases the sequence length and context window of the model without additional compute.
-4. Rotary Positional Embeddings (RoPE) replace absolute learned positional embeddings, saving parameters and improving the model's relative positional generalization.
-5. SwiGLU activation replaces GELU in the MLP block, providing smoother gradients and faster learning.
-6. RMSNorm is used instead of standard LayerNorm, simplifying normalization calculations on the CPU.
-7. The AdamW optimizer with a cosine learning rate scheduler and 200 warmup steps prevents early gradient saturation and ensures stable convergence.
-8. Gradient clipping at a maximum norm of 1.0 prevents training instability at the peak learning rate of 1e-3.
-9. Weight decay of 0.1 is applied only to 2D weights, regularizing the model and preventing overfitting.
-10. This configuration achieves a bits-per-byte (bpb) of 1.9153, representing a massive improvement over the baseline (2.3718) while training in 239 seconds on CPU.
+1. Our best configuration uses a vocabulary size of 2048 BPE tokens, a context block size of 128, and a hybrid 5-layer model combining 3 dense layers and 2 Mixture of Experts (MoE) layers (layers 2 and 3).
+2. Weight tying between token embeddings and the output head reduces parameter count by 327,680, enabling an expanded vocabulary size of 2048 without exceeding total parameter caps.
+3. An optimized, space-preserving pre-tokenization regex (` ?[\u0900-\u097Fa-zA-Z0-9]+|\s+|[^\s]`) merges leading spaces directly into words, boosting the BPE tokenizer's compression ratio to **3.35x** on the corpus.
+4. With a compression ratio of 3.35x, a sequence length of 128 tokens effectively spans an average context of **429 bytes** of text.
+5. In the 5-layer layout, the last layer (layer 4) remains dense to stabilize representation features before final classification.
+6. The MoE layers contain 2 experts each, which are gated dynamically per-token using a learned linear router.
+7. A load-balancing auxiliary loss with a weight of 0.01 is added to the main training loss to prevent expert collapse and ensure balanced routing.
+8. The model has **1,824,624 total parameters** (under the 2.0M cap) and **1,499,200 active parameters** per step (under the 1.5M active cap).
+9. Normalization is handled via parameter-free RMSNorm (with scaling weight), simplifying computation and speeding up CPU forward passes.
+10. This configuration achieves our lowest Bits Per Byte (bpb) of **1.8285** on the dev set, training in 286 seconds on CPU.
