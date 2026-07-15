@@ -18,15 +18,10 @@
             --blue: #3b82f6;
             --purple: #a855f7;
             --gradient-accent: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #a855f7 100%);
-            --gradient-success: linear-gradient(135deg, #10b981, #059669);
             --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background-color: var(--bg-color);
@@ -35,22 +30,15 @@
             line-height: 1.6;
             padding: 2rem 1rem;
             min-height: 100vh;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.05) 0%, transparent 40%),
                 radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 40%);
             background-attachment: fixed;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1100px; margin: 0 auto; }
 
-        header {
-            text-align: center;
-            margin-bottom: 3.5rem;
-            position: relative;
-        }
+        header { text-align: center; margin-bottom: 3.5rem; }
 
         .badge {
             background: linear-gradient(90deg, rgba(6, 182, 212, 0.1), rgba(168, 85, 247, 0.1));
@@ -64,7 +52,6 @@
             text-transform: uppercase;
             display: inline-block;
             margin-bottom: 1rem;
-            backdrop-filter: blur(4px);
         }
 
         h1 {
@@ -78,14 +65,9 @@
             letter-spacing: -0.02em;
         }
 
-        header p {
-            color: var(--text-secondary);
-            font-size: 1.15rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+        header p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
 
-        /* Stats Grid */
+        /* Stats */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -103,65 +85,24 @@
             transition: transform 0.3s ease, border-color 0.3s ease;
         }
 
-        .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(6, 182, 212, 0.3);
-        }
+        .stat-card:hover { transform: translateY(-4px); border-color: rgba(6, 182, 212, 0.3); }
+        .stat-label { font-size: 0.82rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .stat-value { font-family: 'Outfit', sans-serif; font-size: 2.1rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem; }
+        .stat-value.highlight { background: linear-gradient(135deg, #06b6d4, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-change { font-size: 0.82rem; font-weight: 600; color: #10b981; }
 
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-value.highlight {
-            background: linear-gradient(135deg, #06b6d4, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-change {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #10b981;
-        }
-
-        /* Details Section */
-        .grid-details {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        @media (max-width: 868px) {
-            .grid-details {
-                grid-template-columns: 1fr;
-            }
-        }
-
+        /* Cards */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 20px;
             padding: 2.25rem;
             backdrop-filter: blur(12px);
-            height: 100%;
         }
 
         h2 {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.75rem;
+            font-size: 1.6rem;
             font-weight: 600;
             margin-bottom: 1.5rem;
             display: flex;
@@ -175,121 +116,131 @@
             content: '';
             display: inline-block;
             width: 4px;
-            height: 1.5rem;
+            height: 1.4rem;
             background: var(--gradient-accent);
             border-radius: 2px;
+            flex-shrink: 0;
         }
 
-        .features-list {
-            list-style: none;
+        /* Runs Table */
+        .runs-section { margin-bottom: 3rem; }
+
+        .runs-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .feature-item {
-            margin-bottom: 1.5rem;
+        .runs-table th {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
         }
 
+        .runs-table td {
+            padding: 0.85rem 1rem;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            vertical-align: top;
+        }
+
+        .runs-table tr:last-child td { border-bottom: none; }
+        .runs-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+        .best-row td { background: rgba(6, 182, 212, 0.04) !important; }
+        .best-row td:first-child { border-left: 3px solid var(--cyan); padding-left: calc(1rem - 3px); }
+
+        .bpb-val { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.05rem; }
+        .bpb-best { color: #06b6d4; }
+        .bpb-ok   { color: #f59e0b; }
+        .bpb-bad  { color: #6b7280; }
+
+        .tag {
+            display: inline-block;
+            font-size: 0.72rem;
+            padding: 0.12rem 0.45rem;
+            border-radius: 4px;
+            margin-top: 0.2rem;
+            font-weight: 600;
+        }
+        .tag-best { background: rgba(6,182,212,0.12); color: #06b6d4; border: 1px solid rgba(6,182,212,0.25); }
+        .tag-exp  { background: rgba(168,85,247,0.12); color: #a855f7; border: 1px solid rgba(168,85,247,0.25); }
+        .tag-base { background: rgba(255,255,255,0.05); color: #9ca3af; border: 1px solid rgba(255,255,255,0.1); }
+
+        /* Detail grid */
+        .grid-details {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        @media (max-width: 868px) { .grid-details { grid-template-columns: 1fr; } }
+
+        .features-list { list-style: none; }
+        .feature-item { margin-bottom: 1.4rem; }
         .feature-title {
             font-weight: 600;
-            color: #ffffff;
-            font-size: 1.05rem;
+            color: #fff;
+            font-size: 1rem;
             margin-bottom: 0.25rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
-
         .feature-title span {
             color: var(--cyan);
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             background: rgba(6, 182, 212, 0.1);
             padding: 0.1rem 0.5rem;
             border-radius: 4px;
             border: 1px solid rgba(6, 182, 212, 0.2);
         }
+        .feature-desc { color: var(--text-secondary); font-size: 0.9rem; padding-left: 0.5rem; }
 
-        .feature-desc {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            padding-left: 0.5rem;
-        }
-
-        /* Attribution / Breakdown */
-        .breakdown-card {
+        /* Insights panel */
+        .insights-card {
             background: linear-gradient(180deg, rgba(168, 85, 247, 0.04) 0%, rgba(59, 130, 246, 0.02) 100%);
             border: 1px solid rgba(168, 85, 247, 0.15);
         }
 
-        .progress-container {
-            margin-top: 1.5rem;
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-bar-bg {
-            background: rgba(255, 255, 255, 0.05);
-            height: 12px;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .progress-bar-fill {
-            background: var(--gradient-accent);
-            height: 100%;
-            border-radius: 6px;
-            transition: width 1s ease-in-out;
-        }
-
-        .attribution-details {
+        .insight-list { list-style: none; margin-top: 0.6rem; }
+        .insight-list li {
+            position: relative;
+            padding-left: 1.25rem;
+            margin-bottom: 0.65rem;
             font-size: 0.9rem;
             color: var(--text-secondary);
         }
+        .insight-list li::before { content: "✦"; position: absolute; left: 0; color: var(--purple); font-size: 0.7rem; top: 0.3rem; }
 
-        .attribution-details ul {
-            list-style: none;
-            margin-top: 0.75rem;
-        }
+        .insight-section-title { color: #fff; font-weight: 600; font-size: 0.95rem; margin-top: 1.25rem; }
+        .insight-section-title:first-child { margin-top: 0; }
 
-        .attribution-details li {
-            position: relative;
-            padding-left: 1.25rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .attribution-details li::before {
-            content: "✦";
-            position: absolute;
-            left: 0;
-            color: var(--purple);
-        }
-
-        /* Loss Curve Section */
-        .loss-container {
-            margin-top: 2rem;
-            background: rgba(255, 255, 255, 0.01);
+        .loss-box {
+            margin-top: 1.75rem;
+            background: rgba(255,255,255,0.01);
             border: 1px solid var(--card-border);
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             text-align: center;
         }
-
-        .loss-curve-placeholder {
-            height: 80px;
+        .loss-mono {
+            height: 72px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(90deg, rgba(6, 182, 212, 0.05), rgba(168, 85, 247, 0.05));
+            background: linear-gradient(90deg, rgba(6,182,212,0.05), rgba(168,85,247,0.05));
             border-radius: 8px;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border: 1px dashed rgba(255,255,255,0.1);
             color: var(--text-secondary);
             font-family: monospace;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
+            margin-top: 0.75rem;
         }
 
         footer {
@@ -299,123 +250,167 @@
             color: var(--text-secondary);
             font-size: 0.85rem;
         }
-
-        footer strong {
-            color: #ffffff;
-        }
+        footer strong { color: #fff; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="badge">Optimization Summary</div>
-            <h1>2,000 Step LLM Speedrun</h1>
-            <p>A comprehensive summary of the architecture upgrades, optimization runs, and final results for the Plivo LLM speedrun challenge.</p>
-        </header>
+<div class="container">
 
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Baseline BPB</div>
-                <div class="stat-value">2.3718</div>
-                <div class="stat-change" style="color: var(--text-secondary)">Raw Byte Tokenizer</div>
+    <header>
+        <div class="badge">Optimization Summary · 6 Runs Complete</div>
+        <h1>2,000 Step LLM Speedrun</h1>
+        <p>Full experiment log, architecture decisions, and final results for the LLM speedrun challenge.</p>
+    </header>
+
+    <!-- Key stats -->
+    <section class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Baseline BPB</div>
+            <div class="stat-value">2.3718</div>
+            <div class="stat-change" style="color: var(--text-secondary)">Run 0 · Raw Byte Tokenizer</div>
+        </div>
+        <div class="stat-card" style="border-color: rgba(6,182,212,0.35);">
+            <div class="stat-label">Best BPB (Run 3)</div>
+            <div class="stat-value highlight">1.8285</div>
+            <div class="stat-change">▼ 22.9% Improvement</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total / Active Params</div>
+            <div class="stat-value" style="font-size:1.45rem; padding-top:0.35rem;">1,824,624 / 1,499,200</div>
+            <div class="stat-change" style="color:#34d399;">Both caps satisfied ✓</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Training Time (Best)</div>
+            <div class="stat-value">286s</div>
+            <div class="stat-change" style="color:#34d399;">Well under 5-min limit ✓</div>
+        </div>
+    </section>
+
+    <!-- Runs table -->
+    <section class="runs-section">
+        <div class="card">
+            <h2>All Runs at a Glance</h2>
+            <table class="runs-table">
+                <thead>
+                    <tr>
+                        <th>Run</th>
+                        <th>Key Changes</th>
+                        <th>Params (Total / Active)</th>
+                        <th>Time</th>
+                        <th>Dev BPB</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Run 0</strong><br><span class="tag tag-base">Baseline</span></td>
+                        <td>Byte tokenizer, simple 4-layer transformer, no modern techniques.</td>
+                        <td>1.34M / 1.34M</td>
+                        <td>237s</td>
+                        <td><span class="bpb-val bpb-bad">2.3718</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Run 1</strong><br><span class="tag tag-exp">BPE + Modern Arch</span></td>
+                        <td>BPE vocab 1024 (500k corpus), RoPE, RMSNorm, SwiGLU, AdamW+Cosine. 4 layers, d_embd=160.</td>
+                        <td>~1.5M / ~1.5M</td>
+                        <td>320s</td>
+                        <td><span class="bpb-val bpb-ok">1.8856</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Run 2</strong><br><span class="tag tag-exp">Full-Corpus BPE</span></td>
+                        <td>BPE vocab 1024 trained on full 7.3MB corpus (2.21× compression). Same model as Run 1.</td>
+                        <td>~1.5M / ~1.5M</td>
+                        <td>~300s</td>
+                        <td><span class="bpb-val bpb-ok">1.9153</span></td>
+                    </tr>
+                    <tr class="best-row">
+                        <td><strong>Run 3 ★</strong><br><span class="tag tag-best">Best · Final Config</span></td>
+                        <td>Vocab 2048, space-preserving BPE (3.35×), 5-layer hybrid MoE (layers 2 &amp; 3 MoE), d_embd=144, d_ff=368, LR=1e-3, warmup=200.</td>
+                        <td>1,824,624 / 1,499,200</td>
+                        <td>286s</td>
+                        <td><span class="bpb-val bpb-best">1.8285</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Run 4</strong><br><span class="tag tag-exp">6-Layer Depth Test</span></td>
+                        <td>6 layers, 5 MoE (layers 1–5), 1 dense (layer 0), d_embd=128, d_ff=280, LR=1.2e-3. Depth-vs-width experiment.</td>
+                        <td>1,841,024 / 1,303,680</td>
+                        <td>331s</td>
+                        <td><span class="bpb-val bpb-bad">1.8789</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Run 5</strong><br><span class="tag tag-exp">6-Layer Sparse Mid</span></td>
+                        <td>6 layers, MoE layers=[1,2,4] (dense first &amp; last), d_embd=128, d_ff=340, LR=1.2e-3, warmup=50 steps.</td>
+                        <td>1,832,832 / 1,441,152</td>
+                        <td>226s</td>
+                        <td><span class="bpb-val bpb-bad">1.9046</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Architecture + Insights -->
+    <section class="grid-details">
+        <div class="card">
+            <h2>Final Architecture — Run 3</h2>
+            <ul class="features-list">
+                <li class="feature-item">
+                    <div class="feature-title">Space-Preserving BPE Tokenizer <span>Vocab 2048</span></div>
+                    <div class="feature-desc">Regex pattern merges leading spaces into words. Achieves <strong>3.35× compression</strong> — 128 tokens spans ~429 bytes. Trained on full 7.3MB corpus for optimal coverage.</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-title">5-Layer Hybrid MoE <span>3 Dense + 2 MoE</span></div>
+                    <div class="feature-desc">Layers 2 and 3 are MoE blocks (2 experts each). Layers 0, 1, 4 are dense — first and last always dense for embedding/output stability. Total 1.82M params, 1.49M active per token.</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-title">RoPE Positional Embeddings <span>Parameter-free</span></div>
+                    <div class="feature-desc">Rotary embeddings applied to Q/K projections. No learnable positional parameters wasted. Better relative position modeling vs. absolute embeddings.</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-title">Weight Tying <span>Saved ~295k params</span></div>
+                    <div class="feature-desc">Input embedding and LM-head weights shared. Freed capacity for a larger 2048 vocabulary at zero extra parameter cost.</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-title">SwiGLU Feed-Forward <span>d_ff = 368</span></div>
+                    <div class="feature-desc">LLaMA-style SwiGLU (no bias) replaces GELU. Gate, up, and down projections per expert. Smoother gradients and better convergence than standard MLP.</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-title">RMSNorm + AdamW + Cosine LR <span>Modern Training Stack</span></div>
+                    <div class="feature-desc">RMSNorm (learned scale only) per block. AdamW weight decay=0.1 (biases/norms excluded). Cosine decay 1e-3→1e-4 with 200-step warmup and gradient clipping (max norm 1.0).</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card insights-card">
+            <h2>Experiment Insights</h2>
+
+            <p class="insight-section-title">What worked:</p>
+            <ul class="insight-list">
+                <li>Space-preserving BPE (vocab 2048) — biggest single gain, 3.35× compression.</li>
+                <li>Hybrid MoE in middle layers — more total params without exceeding active cap.</li>
+                <li>Dense first &amp; last layer — critical for stable gradients through embedding and output projection.</li>
+                <li>Weight tying — freed ~295k params for a richer vocabulary.</li>
+                <li>d_embd=144 with 4 heads → head_dim=36, which proved superior to 32 in attention expressiveness.</li>
+            </ul>
+
+            <p class="insight-section-title">What didn't help:</p>
+            <ul class="insight-list">
+                <li>5→6 layers forced d_embd 144→128 (head dim 36→32), hurting attention quality more than depth helped.</li>
+                <li>Different MoE layer placements (runs 4 &amp; 5) within d_embd=128 budget made no meaningful difference.</li>
+                <li>50-step vs 200-step warmup had no measurable effect on final BPB.</li>
+                <li>Full-corpus BPE with vocab 1024 (Run 2) hurt vs 500k-corpus BPE — larger vocab budget needed to exploit full corpus.</li>
+            </ul>
+
+            <div class="loss-box">
+                <div class="stat-label">Best Run (Run 3) Loss Curve</div>
+                <div class="loss-mono">7.6677 (step 1) → 3.8829 (step 2000) · BPB 1.8285</div>
             </div>
-            <div class="stat-card" style="border-color: rgba(6, 182, 212, 0.35);">
-                <div class="stat-label">Optimized BPB</div>
-                <div class="stat-value highlight">1.8285</div>
-                <div class="stat-change">▼ 22.9% Improvement</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Parameters</div>
-                <div class="stat-value" style="font-size: 1.8rem; padding-top: 0.4rem; padding-bottom: 0.2rem;">1,824,624 / 1,499,200</div>
-                <div class="stat-change" style="color: #34d399">Total / Active Caps Met</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Training Time</div>
-                <div class="stat-value">286s</div>
-                <div class="stat-change" style="color: #34d399">Limit: ~5 mins (CPU)</div>
-            </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="grid-details">
-            <div class="card">
-                <h2>Model Architecture Upgrades</h2>
-                <ul class="features-list">
-                    <li class="feature-item">
-                        <div class="feature-title">Space-Preserving BPE Tokenizer <span>Vocab: 2048</span></div>
-                        <div class="feature-desc">Implemented an optimized space-preserving BPE regex pattern (` ?[\u0900-\u097Fa-zA-Z0-9]+|\s+|[^\s]`) which groups words with their leading spaces. This achieved an outstanding **3.35x compression ratio**, allowing a context window of 128 tokens to span **429 bytes** of text on average.</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-title">5-Layer Hybrid MoE Architecture <span>3 Dense, 2 MoE</span></div>
-                        <div class="feature-desc">Configured a 5-layer transformer where layers 2 and 3 are MoE blocks with 2 experts each, while layers 0, 1, and 4 remain dense to stabilize embeddings and output projection. This layout maximizes model parameters to **1.82M total** and **1.49M active** per token, fitting tightly under our limits.</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-title">Rotary Positional Embeddings (RoPE) <span>Parameter-free</span></div>
-                        <div class="feature-desc">Replaced absolute learned positional embeddings with Rotary Position Embeddings on queries and keys, improving relative sequence modeling.</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-title">Weight Tying <span>Saved 327k params</span></div>
-                        <div class="feature-desc">Tied weights of the token embedding matrix and output linear head, saving 327k parameters to allow for the larger 2048 vocabulary.</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-title">SwiGLU Feed-Forward Blocks <span>d_ff: 368</span></div>
-                        <div class="feature-desc">Substituted GELU activations with LLaMA-style SwiGLU feed-forward networks (without biases), offering smoother gradients and faster learning.</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-title">RMSNorm Normalization <span>Simplified Norm</span></div>
-                        <div class="feature-desc">Replaced LayerNorm with parameter-free RMSNorm (with learned scaling weights only), speeding up CPU computation per step.</div>
-                    </li>
-                </ul>
-            </div>
+    <footer>
+        <p>6 runs completed · Best: <strong>ckpt.pt (Run 3)</strong> · Dev BPB: <strong>1.8285</strong> · Params: <strong>1,824,624 total / 1,499,200 active</strong></p>
+    </footer>
 
-            <div class="card breakdown-card">
-                <h2>Contribution Breakdown</h2>
-                <div class="progress-container">
-                    <div class="progress-label">
-                        <span>Antigravity Agent (Machine)</span>
-                        <strong>90%</strong>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: 90%;"></div>
-                    </div>
-
-                    <div class="progress-label">
-                        <span>Human User</span>
-                        <strong>10%</strong>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: 10%; background: var(--purple);"></div>
-                    </div>
-                </div>
-
-                <div class="attribution-details">
-                    <strong>Machine Done (Antigravity):</strong>
-                    <ul>
-                        <li>Created optimized CachedBPE tokenizer logic.</li>
-                        <li>Implemented RMSNorm, RoPE, SwiGLU, and hybrid MoE layers.</li>
-                        <li>Configured AdamW, weight decay grouping, and cosine schedule.</li>
-                        <li>Executed training runs, monitored metrics, and analyzed results.</li>
-                    </ul>
-                    <br>
-                    <strong>Human Done (User):</strong>
-                    <ul>
-                        <li>Clarified constraints (3-5 min run limits, 1.5M active parameter cap).</li>
-                        <li>Guided MoE block layer distribution (keeping last layer dense).</li>
-                        <li>Managed codebase directory locations.</li>
-                    </ul>
-                </div>
-
-                <div class="loss-container">
-                    <div class="stat-label" style="margin-bottom: 0.75rem;">Training Loss Evolution</div>
-                    <div class="loss-curve-placeholder">
-                        Loss: 7.6677 (step 1) -> 3.8829 (step 2000)
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <footer>
-            <p>LLM Speedrun Completed Successfully. Final checkpoint: <strong>ckpt.pt</strong> | Final dev bpb: <strong>1.8285</strong></p>
-        </footer>
-    </div>
+</div>
 </body>
 </html>

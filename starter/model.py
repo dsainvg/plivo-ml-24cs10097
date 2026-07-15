@@ -13,12 +13,12 @@ import torch.nn.functional as F
 class Config:
     vocab_size = 2048      # BPE vocab default
     block_size = 128       # Context length
-    n_layer = 5            # Deeper model (5 layers)
+    n_layer = 5            # 5 layers (best config — Run 3)
     n_head = 4             # 4 heads (head dim = 36)
     n_embd = 144           # Embedding dimension
     n_ff = 368             # SwiGLU hidden dim per expert (2.56 * 144 ≈ 368)
     n_experts = 2          # Number of MoE experts
-    moe_layers = [2, 3]    # Layers 2 and 3 are MoE, others (including last layer 4) are dense
+    moe_layers = [2, 3]    # Layers 2 and 3 are MoE; layers 0, 1, 4 are dense (incl. last)
     dropout = 0.0
     tie_weights = True
     aux_loss_weight = 0.01 # Load-balancing auxiliary loss weight

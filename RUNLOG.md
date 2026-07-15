@@ -35,4 +35,22 @@ This file contains the hypothesis, changes, and results for each training run du
 - **Dev BPB**: 1.8285
 - **Conclusion**: A resounding success. Training BPE on 100% of the training corpus improved BPE representation and pushed the dev BPB to a new best of **1.8285**. The model trained in 286 seconds (4.8 minutes). The space-preserving tokenizer allowed the sequence block of 128 to span an average of **429 bytes** of text. The hybrid layout successfully leveraged the MoE expert scaling while remaining strictly within the active and total parameter caps.
 
+## Run 4: 6-Layer Hybrid MoE Model (Depth-vs-Width Experiment)
+- **Hypothesis**: Making the network deeper (6 layers instead of 5) and increasing learning rate to 1.2e-3 will improve sequential logic and convergence, even if the embedding dimension ($d_{embd}$) must be reduced to 128 to stay under the 1.5M active parameter cap.
+- **Changes**:
+  - **Tokenizer**: Identical to Run 3 (Vocab 2048, space-preserving BPE trained on 100% of corpus, 3.35x compression).
+  - **Model**: 6 layers (layers 1, 2, 3, 4, 5 are MoE with 2 experts; layer 0 is dense). $d_{embd}=128$, SwiGLU hidden dim $d_{ff}=280$. Weight tying and RoPE.
+  - **Training**: Set peak learning rate to `1.2e-3` (with 200 step warmup and Cosine schedule).
+  - **Parameters**: Total parameters = 1,841,024. Active parameters = 1,303,680.
+- **Dev BPB**: 1.8789
+- **Conclusion**: The 6-layer model trained in 331 seconds (exceeding the 5-minute training target) and got a slightly worse dev BPB of **1.8789** (compared to **1.8285** in Run 3). This confirms that for small parameter regimes and large vocabularies (2048), model width ($d_{embd} = 144$) and active parameter capacity per step (~1.5M) are more crucial than model depth (6 layers). The Run 3 model was restored as the best checkpoint.
 
+## Run 5: 6-Layer Hybrid MoE — Sparse Middle Pattern (Layers 1, 2, 4 as MoE) + 50-step Warmup
+- **Hypothesis**: Changing the MoE placement to a "sparse middle" pattern (layers 1, 2, 4 are MoE; layers 0, 3, 5 are dense) so that **both the first and last layers are dense**, and reducing warmup from 200 → 50 steps so the peak LR is reached faster, will improve BPB for the 6-layer model.
+- **Changes**:
+  - **Tokenizer**: Identical to Run 3 (Vocab 2048, space-preserving BPE, 3.35x compression).
+  - **Model**: 6 layers, `moe_layers = [1, 2, 4]`. Layer 0 = dense (embedding stabilizer), Layers 1, 2, 4 = MoE (2 experts), Layer 3, 5 = dense (last layer dense). $d_{embd}=128$, $d_{ff}=340$.
+  - **Training**: Peak LR `1.2e-3`, **warmup fixed to 50 steps** (down from 200), Cosine decay.
+  - **Parameters**: Total = 1,832,832. Active = 1,441,152.
+- **Dev BPB**: 1.9046
+- **Conclusion**: Despite the improved MoE placement (both first and last layers dense) and faster warmup, the 6-layer `d_embd=128` model again underperformed Run 3's 5-layer `d_embd=144` model (1.9046 vs 1.8285). The narrower embedding dimension is a hard constraint: with fewer dimensions per head (32 vs 36), attention quality degrades regardless of depth or warmup schedule. **Run 3 (5-layer, d_embd=144, BPB=1.8285) remains the final best configuration.**

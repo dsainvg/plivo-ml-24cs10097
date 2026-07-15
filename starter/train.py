@@ -74,7 +74,7 @@ def main():
     ]
     opt = torch.optim.AdamW(optim_groups, lr=args.lr, betas=(0.9, 0.95), eps=1e-8)
 
-    warmup_steps = int(0.1 * args.steps)  # 10% of steps for warmup
+    warmup_steps = 50  # Fixed 50-step warmup
     min_lr = 0.1 * args.lr
 
     model.train()
